@@ -42,4 +42,4 @@ for i=1:1:70
 end
 
 surf(x_plot, y_plot, z_plot)
-plot3D(training_set_in[:,1], training_set_in[:,2], training_set_out, marker='.')
+#plot3D(training_set_in[:,1], training_set_in[:,2], training_set_out, marker='.')
