@@ -26,14 +26,14 @@ function delta(n_input,n_hidden,training_set_in,training_set_out,w,w_0,w_io,v_0,
       sum_y = feedforward(training_set_in[i,:],n_input,w,w_0,n_hidden,v,v_0,w_hh,w_io)[4]
       y = y[1]
 
-      # Applying gradient descent
+      # Applying gradient descent (ascent?)
       for j=1:1 # for each output unit
-        d_v_0[j] += -alpha * (training_set_out[i]-y) * sigmoid_der(sum_y) * 1
+        d_v_0[j] += alpha * (training_set_out[i]-y) * sigmoid_der(sum_y) * 1
         for k=1:n_input # for each input unit
-          d_w_io[j,k] += -alpha * (training_set_out[i]-y) * sigmoid_der(sum_y) * training_set_in[i,k]
+          d_w_io[j,k] += alpha * (training_set_out[i]-y) * sigmoid_der(sum_y) * training_set_in[i,k]
         end
         for k=1:n_hidden
-          d_v[k] += -alpha * (training_set_out[i]-y) * sigmoid_der(sum_y) * z[k]
+          d_v[k] += alpha * (training_set_out[i]-y) * sigmoid_der(sum_y) * z[k]
         end
       end
 
