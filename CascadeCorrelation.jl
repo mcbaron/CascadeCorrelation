@@ -13,7 +13,7 @@ function cascade_correlation(n_input,training_set_in,training_set_out)
 
   # Parameters and variables
   alpha_hid = 0.1  # learning rate for new hidden unit's input weights
-  n_candidates = 1  # how many candidate units will be initialized on adding each hidden neuron
+  n_candidates = 5  # how many candidate units will be initialized on adding each hidden neuron
 
   n_hidden = 0
   w_io = rand(1,n_input)  # weights input-output [output_neuron,input_neuron]

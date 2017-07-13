@@ -41,7 +41,7 @@ z_plot = zeros(70,70)
 for i=1:1:70
   for j=1:1:70
     #z_plot[i,j] = feedforward([x_plot[i] y_plot[j]],n_input,w,w_0,size(w,1),v,v_0,w_hh,w_io)[2][1]
-    z_plot[i,j] = feedforward([x_plot[i] y_plot[j]],n_input,0,0,0,0,v_0,0,w_io)[2][1]
+    z_plot[i,j] = feedforward([x_plot[i] y_plot[j]],n_input,w,w_0,size(w,1),v,v_0,w_hh,w_io)[2][1]
   end
 end
 
