@@ -32,9 +32,9 @@ function cascade_correlation(n_input,training_set_in,training_set_out)
   v = zeros(1,1) # weights (hidden-output) [output_neuron,hidden_neuron]
 
   # Candidate units
-  w_cand = zeros(n_candidates,1,n_input)
-  w_0_cand = zeros(n_candidates,1)
-  w_hh_cand = zeros(n_candidates,1)  # can only receive outputs of other units
+  w_cand = zeros(n_candidates,n_input)  # input -> new_hidden
+  w_0_cand = zeros(n_candidates,1)  # hidden input bias
+  w_hh_cand = zeros(n_candidates,1)  # hidden -> hidden; can only receive outputs of other units
 
   z = zeros(n_hidden) # TODO calculated values at the outputs of each hidden neuron
 
@@ -50,39 +50,39 @@ function cascade_correlation(n_input,training_set_in,training_set_out)
     err = 0
 
     # Best weights among candidate units
-    w_best_cand = w_cand[1,:,:]
+    w_best_cand = w_cand[1,:] # input -> new_hidden
     w_0_best_cand = w_0_cand[1,:]
-    w_hh_best_cand = w_hh[1,:,:]
+    w_hh_best_cand = w_hh_cand[1,:]
     err_min = Inf # will definetly be less than Inf after Adjusting inputs of hidden unit
 
     # Making some candidate units with different initial weights,
     # then optimizing them as much as possible
     for c = 1:n_candidates
 
-      w_cand[c,:,:] = rand(1,n_hidden,n_input)  # weights (input-hidden) [hidden_neuron,input_neuron]
-      w_0_cand[c,:] = rand(1,n_hidden)  # biases of each hidden neuron
+      w_cand[c,:] = rand(1,n_input)  # weights (input-hidden) [hidden_neuron,input_neuron]
+      w_0_cand[c,:] = rand(1,1)  # biases of each hidden neuron
       w_hh_cand[c,:] = [rand(1,n_hidden-1) 0] # weights (hidden-hidden) [hidden_neuron_from]
       # TODO what if n_hidden=1 ?
       err_cand = 0  # correlation between output of hidden unit and residual output error of the network (to decide which candidate unit is best)
 
       if (iteration == 1) # if no hidden units yet
-        (w_cand[c,:,:],w_0_cand[c,:],w_hh_cand[c,:],err_cand) =
-        adjust_hidden(n_input,n_hidden,0,0,0,0,v_0,w_io,training_set_in,training_set_out,alpha_hid,w_cand[c,:,:],w_0_cand[c,:],w_hh_cand[c,:])
+        (w_cand[c,:],w_0_cand[c,:],w_hh_cand[c,:],err_cand) =
+        adjust_hidden(n_input,n_hidden,0,0,0,0,v_0,w_io,training_set_in,training_set_out,alpha_hid,w_cand[c,:],w_0_cand[c,:],w_hh_cand[c,:])
       else
-        (w_cand[c,:,:],w_0_cand[c,:],w_hh_cand[c,:],err_cand) = adjust_hidden(n_input,n_hidden,w,w_0,v,w_hh,v_0,w_io,training_set_in,training_set_out,alpha_hid,w_cand[c,:,:],w_0_cand[c,:],w_hh_cand[c,:])
+        (w_cand[c,:],w_0_cand[c,:],w_hh_cand[c,:],err_cand) = adjust_hidden(n_input,n_hidden,w,w_0,v,w_hh,v_0,w_io,training_set_in,training_set_out,alpha_hid,w_cand[c,:],w_0_cand[c,:],w_hh_cand[c,:])
       end
 
       if (err_cand < err_min)  # if candidate is better
-        w_best_cand = w_cand[c]
-        w_0_best_cand = w_0_cand[c]
-        w_hh_best_cand = w_hh_cand[c]
+        w_best_cand = w_cand[c,:]
+        w_0_best_cand = w_0_cand[c,:]
+        w_hh_best_cand = w_hh_cand[c,:]
         err_min = err_cand
       end
     end
 
     # New lines/columns are already added
     w[n_hidden,:] = w_best_cand
-    w_0[n_hidden] = w_0_best_cand
+    w_0[n_hidden] = w_0_best_cand[1]
     w_hh[n_hidden,:] = w_hh_best_cand
 
     # Retraining in-out and hid-out weights
@@ -103,8 +103,8 @@ function cascade_correlation(n_input,training_set_in,training_set_out)
     n_hidden += 1
 
     # Candidate units
-    w_cand = zeros(n_candidates,n_hidden,n_input)
-    w_0_cand = zeros(n_candidates,n_hidden)
+    w_cand = zeros(n_candidates,n_input)
+    w_0_cand = zeros(n_candidates,1)
     w_hh_cand = zeros(n_candidates,n_hidden)
 
     # Adding new rows/columns (empty)
@@ -112,7 +112,7 @@ function cascade_correlation(n_input,training_set_in,training_set_out)
     w_0 = [w_0; rand(1)]  # biases (input-hidden)
     w_hh = [w_hh zeros(n_hidden-1,1)]
     w_hh = [w_hh; rand(1,n_hidden-1) 0]
-    #v = [v rand(1)] #
+    v = [v rand(1)] #
 
     z = zeros(n_hidden)
     #(z, y) = feedforward(x,n_input,w,w_0,n_hidden,v,v_0,w_hh,w_io)  # outputs of hidden units and output of the network
