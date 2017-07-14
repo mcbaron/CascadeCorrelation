@@ -1,7 +1,10 @@
 # Adjusting weights and adding new hidden neurons
+# Input:
+# 1) training_set_in [pattern, input]
+# 2) training_set_out [pattern] (always 1 output)
 #
 # Return:
-# (w_io,w,w_0,w_hh,v,v_0)
+# (w_io, w, w_0, w_hh, v, v_0)
 # 1) w_io - weights from input to output units [output_neuron,input_neuron]
 # 2) w - input-hidden weights [hidden_neuron,input_neuron]
 # 3) w_0 - bias of input-hidden weights [hidden_neuron]
@@ -9,22 +12,24 @@
 # 5) v - hidden-output weights [output_neuron,hidden_neuron]
 # 6) v_0 - bias of hidden-output weights [output_neuron]
 
-function cascade_correlation(n_input,training_set_in,training_set_out)
+function cascade_correlation(training_set_in, training_set_out)
 
   # Parameters and variables
+  n_input = size(training_set_in,2)
   alpha_hid = 0.1  # learning rate for new hidden unit's input weights
-  n_candidates = 5  # how many candidate units will be initialized on adding each hidden neuron
+  n_candidates = 10  # how many candidate units will be initialized on adding each hidden neuron
+  max_hidden = 5  # maximum amount of hidden units
 
+  # Initialization
   n_hidden = 0
   w_io = rand(1,n_input)  # weights input-output [output_neuron,input_neuron]
   v_0 = rand(1)  # bias of output neuron
 
   # Adjusting input-output weights by Delta Rule as much as possible
-  (w_io, v_0) = delta(n_input,n_hidden,training_set_in,training_set_out,0,0,w_io,v_0,0,0)[1:2]
+  (w_io, v_0) = delta(n_input, n_hidden, training_set_in, training_set_out, 0, 0, w_io, v_0, 0, 0)[1:2]
 
-  # Adding first neuron into the Network
-  # (Initializing several candidate units, training them, then choosing the best one)
-  n_hidden = 1 # amount of hidden neurons (initially 1)
+  # Adding first neuron into the Network (Initializing several candidate units, training them, then choosing the best one)
+  n_hidden = 1
 
   w = zeros(1,n_input)  # weights (input-hidden) [hidden_neuron,input_neuron]
   w_0 = zeros(1)  # biases of each hidden neuron
@@ -43,7 +48,7 @@ function cascade_correlation(n_input,training_set_in,training_set_out)
   err = Inf
 
   # Calculating error and adding another hidden unit if needed
-  for iteration=1:200 # (maximum 200 hidden units)
+  for iteration = 1:max_hidden
 
     # Incremental squared error (to decide if we need another hidden unit)
     err_prev = err
@@ -119,6 +124,6 @@ function cascade_correlation(n_input,training_set_in,training_set_out)
 
   end
 
-  return (w_io,w,w_0,w_hh,v,v_0)
+  return (w_io, w, w_0, w_hh, v, v_0)
 
 end
