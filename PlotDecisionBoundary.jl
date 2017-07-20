@@ -3,9 +3,9 @@
 function plot_decision_boundary()
 
   #x_plot = linspace(0.1,7,70)
-  x_plot = -10:0.1:10
+  x_plot = 0:0.1:10
   #y_plot = linspace(0.1,7,70)
-  y_plot = -10:0.1:10
+  y_plot = 0:0.1:10
   #z_plot_delta = zeros(70,70)
   #z_plot_hidden = zeros(70,70)
 
@@ -38,6 +38,14 @@ function plot_decision_boundary()
   ylabel("Y")
   title("Contour Plot")
   tight_layout()
+
+  for i=1:size(training_set_in,1)
+    if (training_set_out[i] == 1)
+      plot(training_set_in[i,1],training_set_in[i,2],"ro")
+    else
+      plot(training_set_in[i,1],training_set_in[i,2],"bo")
+    end
+  end
 
   #cs = contour(xgrid,ygrid,z,fill=true)
   #colorbar(cs, shrink=0.8, extent='both')
