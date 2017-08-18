@@ -16,9 +16,9 @@ function cascade_correlation(training_set_in, training_set_out)
 
   # Parameters and variables
   n_input = size(training_set_in,2)
-  alpha_hid = 0.1  # learning rate for new hidden unit's input weights
+  alpha_hid_in = 0.1  # learning rate for new hidden unit's input weights
   n_candidates = 10  # how many candidate units will be initialized on adding each hidden neuron
-  max_hidden = 5  # maximum amount of hidden units
+  max_hidden = 20  # maximum amount of hidden units
 
   # Initialization
   n_hidden = 0
@@ -43,12 +43,13 @@ function cascade_correlation(training_set_in, training_set_out)
 
   z = zeros(n_hidden) # TODO calculated values at the outputs of each hidden neuron
 
-  eps = 0.01  # precision
+  eps = 0.002  # precision
   err_prev = 0
   err = Inf
+  err_arr = zeros(max_hidden)
 
   # Calculating error and adding another hidden unit if needed
-  for iteration = 1:max_hidden
+  for iteration = 1:1
 
     # Incremental squared error (to decide if we need another hidden unit)
     err_prev = err
@@ -72,9 +73,9 @@ function cascade_correlation(training_set_in, training_set_out)
 
       if (iteration == 1) # if no hidden units yet
         (w_cand[c,:],w_0_cand[c,:],w_hh_cand[c,:],err_cand) =
-        adjust_hidden(n_input,n_hidden,0,0,0,0,v_0,w_io,training_set_in,training_set_out,alpha_hid,w_cand[c,:],w_0_cand[c,:],w_hh_cand[c,:])
+        adjust_hidden(n_input,n_hidden,0,0,0,0,v_0,w_io,training_set_in,training_set_out,alpha_hid_in,w_cand[c,:],w_0_cand[c,:],w_hh_cand[c,:])
       else
-        (w_cand[c,:],w_0_cand[c,:],w_hh_cand[c,:],err_cand) = adjust_hidden(n_input,n_hidden,w,w_0,v,w_hh,v_0,w_io,training_set_in,training_set_out,alpha_hid,w_cand[c,:],w_0_cand[c,:],w_hh_cand[c,:])
+        (w_cand[c,:],w_0_cand[c,:],w_hh_cand[c,:],err_cand) = adjust_hidden(n_input,n_hidden,w,w_0,v,w_hh,v_0,w_io,training_set_in,training_set_out,alpha_hid_in,w_cand[c,:],w_0_cand[c,:],w_hh_cand[c,:])
       end
 
       if (err_cand < err_min)  # if candidate is better
@@ -98,6 +99,9 @@ function cascade_correlation(training_set_in, training_set_out)
       y = feedforward(training_set_in[p,:],n_input,w,w_0,n_hidden,v,v_0,w_hh,w_io)[2]
       err += (training_set_out[p] - y)^2
     end
+
+    # History of errors for each amount of hidden units
+    err_arr[iteration] = err
 
     # If error is low enough, stop adjust hidden neurons
     if (abs(err - err_prev) < eps)
@@ -124,6 +128,6 @@ function cascade_correlation(training_set_in, training_set_out)
 
   end
 
-  return (w_io, w, w_0, w_hh, v, v_0)
+  return (w_io, w, w_0, w_hh, v, v_0, err_arr)
 
 end
