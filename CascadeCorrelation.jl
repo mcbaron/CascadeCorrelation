@@ -23,23 +23,19 @@ function cascade_correlation(training_set_in, training_set_out)
   # Initialization
   n_hidden = 0
   w_io = rand(1,n_input)  # weights input-output [output_neuron,input_neuron]
-  v_0 = rand(1)  # bias of output neuron
+  v_0 = rand()  # bias of output neuron
 
   # Adjusting input-output weights by Delta Rule as much as possible
   (w_io, v_0) = delta(n_input, n_hidden, training_set_in, training_set_out, 0, 0, w_io, v_0, 0, 0)[1:2]
 
   # Adding first neuron into the Network (Initializing several candidate units, training them, then choosing the best one)
-  n_hidden = 1
+  n_hidden = 0
 
-  w = zeros(1,n_input)  # weights (input-hidden) [hidden_neuron,input_neuron]
-  w_0 = zeros(1)  # biases of each hidden neuron
-  w_hh = zeros(1,1) # weights (hidden-hidden) [hidden_neuron_to,hidden_neuron_from]
-  v = zeros(1,1) # weights (hidden-output) [output_neuron,hidden_neuron]
-
-  # Candidate units
-  w_cand = zeros(n_candidates,n_input)  # input -> new_hidden
-  w_0_cand = zeros(n_candidates,1)  # hidden input bias
-  w_hh_cand = zeros(n_candidates,1)  # hidden -> hidden; can only receive outputs of other units
+  w = zeros(0,n_input)  # weights (input-hidden) [hidden_neuron,input_neuron]
+  w_0 = zeros(0)  # biases of each hidden neuron
+  w_hh = 0 # weights (hidden-hidden) [hidden_neuron_to,hidden_neuron_from]
+  v = rand(1,1) # weights (hidden-output) [output_neuron,hidden_neuron]
+  # this is the only array that is initialized with a number (rand) (or should be zero? TODO)
 
   z = zeros(n_hidden) # TODO calculated values at the outputs of each hidden neuron
 
@@ -49,48 +45,15 @@ function cascade_correlation(training_set_in, training_set_out)
   err_arr = zeros(max_hidden)
 
   # Calculating error and adding another hidden unit if needed
-  for iteration = 1:1
+  for iteration = 1:2
 
     # Incremental squared error (to decide if we need another hidden unit)
     err_prev = err
     err = 0
 
-    # Best weights among candidate units
-    w_best_cand = w_cand[1,:] # input -> new_hidden
-    w_0_best_cand = w_0_cand[1,:]
-    w_hh_best_cand = w_hh_cand[1,:]
-    err_min = Inf # will definetly be less than Inf after Adjusting inputs of hidden unit
+    (w, w_0, w_hh, v, n_hidden, err) = add_hidden(training_set_in, training_set_out, w, w_0, w_hh, v, v_0, w_io, n_candidates, n_hidden, alpha_hid_in)
 
-    # Making some candidate units with different initial weights,
-    # then optimizing them as much as possible
-    for c = 1:n_candidates
-
-      w_cand[c,:] = rand(1,n_input)  # weights (input-hidden) [hidden_neuron,input_neuron]
-      w_0_cand[c,:] = rand(1,1)  # biases of each hidden neuron
-      w_hh_cand[c,:] = [rand(1,n_hidden-1) 0] # weights (hidden-hidden) [hidden_neuron_from]
-      # TODO what if n_hidden=1 ?
-      err_cand = 0  # correlation between output of hidden unit and residual output error of the network (to decide which candidate unit is best)
-
-      if (iteration == 1) # if no hidden units yet
-        (w_cand[c,:],w_0_cand[c,:],w_hh_cand[c,:],err_cand) =
-        adjust_hidden(n_input,n_hidden,0,0,0,0,v_0,w_io,training_set_in,training_set_out,alpha_hid_in,w_cand[c,:],w_0_cand[c,:],w_hh_cand[c,:])
-      else
-        (w_cand[c,:],w_0_cand[c,:],w_hh_cand[c,:],err_cand) = adjust_hidden(n_input,n_hidden,w,w_0,v,w_hh,v_0,w_io,training_set_in,training_set_out,alpha_hid_in,w_cand[c,:],w_0_cand[c,:],w_hh_cand[c,:])
-      end
-
-      if (err_cand < err_min)  # if candidate is better
-        w_best_cand = w_cand[c,:]
-        w_0_best_cand = w_0_cand[c,:]
-        w_hh_best_cand = w_hh_cand[c,:]
-        err_min = err_cand
-      end
-    end
-
-    # New lines/columns are already added
-    w[n_hidden,:] = w_best_cand
-    w_0[n_hidden] = w_0_best_cand[1]
-    w_hh[n_hidden,:] = w_hh_best_cand
-
+    v = [v; rand(1,1)]
     # Retraining in-out and hid-out weights
     (w_io, v_0, v) = delta(n_input,n_hidden,training_set_in,training_set_out,w,w_0,w_io,v_0,v,w_hh)
 
@@ -107,24 +70,6 @@ function cascade_correlation(training_set_in, training_set_out)
     if (abs(err - err_prev) < eps)
       break
     end
-
-    # Adding new neuron into the network
-    n_hidden += 1
-
-    # Candidate units
-    w_cand = zeros(n_candidates,n_input)
-    w_0_cand = zeros(n_candidates,1)
-    w_hh_cand = zeros(n_candidates,n_hidden)
-
-    # Adding new rows/columns (empty)
-    w = [w; rand(1,n_input)]  # giving random weights (input-hidden)
-    w_0 = [w_0; rand(1)]  # biases (input-hidden)
-    w_hh = [w_hh zeros(n_hidden-1,1)]
-    w_hh = [w_hh; rand(1,n_hidden-1) 0]
-    v = [v rand(1)] #
-
-    z = zeros(n_hidden)
-    #(z, y) = feedforward(x,n_input,w,w_0,n_hidden,v,v_0,w_hh,w_io)  # outputs of hidden units and output of the network
 
   end
 

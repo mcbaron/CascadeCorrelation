@@ -8,9 +8,10 @@ sigmoid_der(x) = sech(x)^2
 
 include("FeedForward.jl")
 include("Delta.jl")
+include("AdjustHidden.jl")
+include("AddHidden.jl")
 include("CascadeCorrelation.jl")
 include("ShufflePatterns.jl")
-include("AdjustHidden.jl")
 include("PlotDecisionBoundary.jl")
 include("ReadData.jl")
 using DataFrames

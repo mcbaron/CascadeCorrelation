@@ -28,7 +28,7 @@ function delta(n_input, n_hidden, training_set_in, training_set_out, w, w_0, w_i
 
       # Applying gradient descent (ascent?)
       for j=1:1 # for each output unit
-        d_v_0[j] += alpha_out * (training_set_out[i] - y) * sigmoid_der(sum_y) * 1
+        d_v_0 += alpha_out * (training_set_out[i] - y) * sigmoid_der(sum_y) * 1
         for k=1:n_input # for each input unit
           d_w_io[j,k] += alpha_out * (training_set_out[i] - y) * sigmoid_der(sum_y) * training_set_in[i,k]
         end
@@ -45,12 +45,13 @@ function delta(n_input, n_hidden, training_set_in, training_set_out, w, w_0, w_i
     v_0 += d_v_0
     w_io += d_w_io
     v += d_v
+    v_0 = v_0[1]
 
     if (abs(err - err_prev) < eps)
       break
     end
   end
 
-  return (w_io, v_0, v)
+  return (w_io, v_0[1], v)
 
 end

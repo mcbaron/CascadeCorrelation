@@ -9,7 +9,7 @@
 # b - weights (hidden-hidden)
 # c - weights (input-output)
 
-function feedforward(x,n_input,w,w_0,n_hidden,v,v_0,w_hh,w_io)
+function feedforward(x, n_input, w, w_0, n_hidden, v, v_0, w_hh, w_io)
 
   z = zeros(n_hidden) # calculated values of each hidden neuron (sigmoid applied)
   y = 0 # output
@@ -25,22 +25,22 @@ function feedforward(x,n_input,w,w_0,n_hidden,v,v_0,w_hh,w_io)
     for j=1:i-1 # for each preceding hidden neuron
       sum_h += w_hh[i,j]*z[j]
     end
-    z[i] = sigmoid(sum_h)  # output of hidden neuron
+    z[i] = sigmoid(sum_h)[1]  # output of hidden neuron
   end
 
   for i=1:1 # for each output neuron
     sum_y = 0
-    sum_y += v_0[i]  # bias (z_0 = 1)
+    sum_y += v_0  # bias (z_0 = 1)
     for j=1:n_input # for each input neuron
       sum_y += w_io[i,j]*x[j]
     end
     for j=1:n_hidden
-      sum_y += v[i,j]*z[j]
+      sum_y += v[i]*z[j]
     end
     y = sigmoid(sum_y) # TODO delete
   end
 
-  return (z, y, sum_h, sum_y) # returns tuple:
+  return (z, y[1], sum_h, sum_y[1]) # returns tuple:
   # output values of hidden units
   # output value of network
   # weighted sum of inputs of last added hidden unit
