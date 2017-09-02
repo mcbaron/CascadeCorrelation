@@ -9,10 +9,7 @@ function add_hidden(training_set_in, training_set_out, w, w_0, w_hh, v, v_0, w_i
 	w_0_cand = zeros(n_candidates)	# new hidden bias
 	w_hh_cand = Array{Array{Float64}}(n_candidates)  # hidden -> hidden; can only receive outputs of other units
 
-	# Best weights among candidate units
-	#--#w_best_cand = w_cand[1,:] # input -> new_hidden
-	#--#w_0_best_cand = w_0_cand[1,:]
-	#--#w_hh_best_cand = w_hh_cand[1,:]
+	# Weights of best candidate unit so far
 	w_best_cand = 0
 	w_0_best_cand = 0
 	w_hh_best_cand = 0
@@ -54,22 +51,11 @@ function add_hidden(training_set_in, training_set_out, w, w_0, w_hh, v, v_0, w_i
 		v = rand()
 	else
 		w = [w; w_best_cand.']
-		w_0 = [w_0, w_0_best_cand]
+		w_0 = [w_0; w_0_best_cand]
 		w_hh = [w_hh zeros(n_hidden-1,1)]
 		w_hh = [w_hh; w_hh_best_cand.']
-		v = [v, rand()]
+		v = [v; rand()]
 	end
-
-	#w_hh[n_hidden,:] = transpose(w_hh_best_cand)
-
-	# Retraining in-out and hid-out weights
-	#--#(w_io, v_0, v) = delta(n_input,n_hidden,training_set_in,training_set_out,w,w_0,w_io,v_0,v,w_hh)
-
-	# Calculating error by summating differences between FF results and training set
-	#--#for p = 1:size(training_set_in,1)
-	#--#	y = feedforward(training_set_in[p,:],n_input,w,w_0,n_hidden,v,v_0,w_hh,w_io)[2]
-	#--#	err += (training_set_out[p] - y)^2
-	#--#end
 
 	return (w, w_0, w_hh, v, n_hidden, err_min)
 

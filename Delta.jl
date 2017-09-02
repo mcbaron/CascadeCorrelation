@@ -1,5 +1,5 @@
-# Delta Rule implementation
 
+"Delta Rule implementation"
 function delta(n_input, n_hidden, training_set_in, training_set_out, w, w_0, w_io, v_0, v, w_hh)
 
   alpha_out = 0.1 # learning rate
@@ -8,13 +8,14 @@ function delta(n_input, n_hidden, training_set_in, training_set_out, w, w_0, w_i
   err_prev = 0 # same error on previous iteration
   n_patterns = size(training_set_out,1)
 
-  for iter=1:500 # up to maximum amount of iterations (endless loop protection)
+  for iter=1:10 # up to maximum amount of iterations (endless loop protection)
 
     err_prev = err
     err = 0
     sum_y = 0 # weighted sum of inputs of the output neuron
     alpha_out = alpha_out * 0.99  # decreasing learning rate
 
+    # Batch gradient descent (ascent)
     d_v_0 = zeros(size(v_0))
     d_v = zeros(size(v))
     d_w_io = zeros(size(w_io))
@@ -28,12 +29,12 @@ function delta(n_input, n_hidden, training_set_in, training_set_out, w, w_0, w_i
 
       # Applying gradient descent (ascent?)
       for j=1:1 # for each output unit
-        d_v_0 += alpha_out * (training_set_out[i] - y) * sigmoid_der(sum_y) * 1
+        d_v_0 += -alpha_out * (training_set_out[i] - y) * sigmoid_der(sum_y) * 1
         for k=1:n_input # for each input unit
-          d_w_io[j,k] += alpha_out * (training_set_out[i] - y) * sigmoid_der(sum_y) * training_set_in[i,k]
+          d_w_io[j,k] += -alpha_out * (training_set_out[i] - y) * sigmoid_der(sum_y) * training_set_in[i,k]
         end
         for k=1:n_hidden
-          d_v[k] += alpha_out * (training_set_out[i] - y) * sigmoid_der(sum_y) * z[k]
+          d_v[k] += -alpha_out * (training_set_out[i] - y) * sigmoid_der(sum_y) * z[k]
         end
       end
 

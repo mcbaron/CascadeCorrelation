@@ -44,7 +44,9 @@ function adjust_hidden(n_input, n_hidden, w, w_0, v, w_hh, v_0, w_io, training_s
 
     # TODO Check for errors & delete
     # In case of gradient ascent, correlation decreases, but should increase
-    print("Iter:",iter," Error:",err,"\n")
+    if (iter % 20 == 0)
+      #print("Iter:",iter," Error:",err,"\n")
+    end
 
     # Applying gradient ascent (optimizing input weights of the new hidden neuron (NHN))
 
@@ -55,7 +57,7 @@ function adjust_hidden(n_input, n_hidden, w, w_0, v, w_hh, v_0, w_io, training_s
     d_w_0_cand_concr = 0
     for i=1:size(training_set_in,1)
       #d_w_0_cand_concr += sign_corr(z_avg, e_avg) * ((training_set_out[i] - y_pattern[i]) - e_avg) * sigmoid_der(summ[i]) * 1 * alpha_hid_in
-      #d_w_0_cand_concr += ((training_set_out[i] - y_pattern[i]) - e_avg) * sigmoid_der(summ[i]) * 1 * alpha_hid_in
+      d_w_0_cand_concr += ((training_set_out[i] - y_pattern[i]) - e_avg) * sigmoid_der(summ[i]) * 1 * alpha_hid_in
     end
     w_0_cand_concr += d_w_0_cand_concr  # changing w_0 of the candidate unit
 
