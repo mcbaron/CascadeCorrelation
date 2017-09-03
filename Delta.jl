@@ -5,14 +5,14 @@ function delta(n_input, n_hidden, training_set_in, training_set_out, w, w_0, w_i
   alpha_out = 0.1 # learning rate
   eps = 0.02 # patience
   err = Inf # squared error between y and y_target
-  err_prev = 0 # same error on previous iteration
+  err_prev = 0.0 # same error on previous iteration
   n_patterns = size(training_set_out,1)
 
   for iter=1:10 # up to maximum amount of iterations (endless loop protection)
 
     err_prev = err
-    err = 0
-    sum_y = 0 # weighted sum of inputs of the output neuron
+    err = 0.0
+    sum_y = 0.0 # weighted sum of inputs of the output neuron
     alpha_out = alpha_out * 0.99  # decreasing learning rate
 
     # Batch gradient descent (ascent)

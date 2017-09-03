@@ -10,9 +10,9 @@ function add_hidden(training_set_in, training_set_out, w, w_0, w_hh, v, v_0, w_i
 	w_hh_cand = Array{Array{Float64}}(n_candidates)  # hidden -> hidden; can only receive outputs of other units
 
 	# Weights of best candidate unit so far
-	w_best_cand = 0
-	w_0_best_cand = 0
-	w_hh_best_cand = 0
+	w_best_cand = 0.0
+	w_0_best_cand = 0.0
+	w_hh_best_cand = 0.0
 	err_min = Inf # minimal error among candidates, will definetly be less than Inf after Adjusting inputs of hidden unit
 
 	# Making some candidate units with different initial weights,
@@ -23,12 +23,12 @@ function add_hidden(training_set_in, training_set_out, w, w_0, w_hh, v, v_0, w_i
 		w_0_cand[c] = rand()  # biases of each hidden neuron
 		w_hh_cand[c] = [rand(1,n_hidden) 0].' # weights (hidden-hidden) [hidden_neuron_from]
 
-		err_cand = 0	# correlation between output of hidden unit and residual output error of the network
+		err_cand = 0.0	# correlation between output of hidden unit and residual output error of the network
 						# (to decide which candidate unit is best)
 
 		if (n_hidden == 0) # if no hidden units yet
 			(w_cand[c],w_0_cand[c],w_hh_cand[c],err_cand) =
-			adjust_hidden(n_input,n_hidden,0,0,0,0,v_0,w_io,training_set_in,training_set_out,alpha_hid_in,w_cand[c],w_0_cand[c],w_hh_cand[c])
+			adjust_hidden(n_input,n_hidden,zeros(0,0),zeros(0,0),zeros(0,0),zeros(0,0),v_0,w_io,training_set_in,training_set_out,alpha_hid_in,w_cand[c],w_0_cand[c],w_hh_cand[c])
 		else
 			(w_cand[c],w_0_cand[c],w_hh_cand[c],err_cand) =
 			adjust_hidden(n_input,n_hidden,w,w_0,v,w_hh,v_0,w_io,training_set_in,training_set_out,alpha_hid_in,w_cand[c],w_0_cand[c],w_hh_cand[c])

@@ -17,14 +17,14 @@ include("ReadData.jl")
 import DataFrames.readtable
 using PyPlot
 
-n_input = 2 # amount of input neurons
+const n_input = 2 # amount of input neurons
 #n_output = 1 # amount of output neurons
 
 # Opening file with data
 (training_set_in, training_set_out) = read_data("data.csv")
 
 # Applying CC algorithm
-w_io = w = w_0 = w_hh = v = v_0 = err_arr = 0
+w_io = w = w_0 = w_hh = v = v_0 = err_arr = 0.0
 w = Float64(0)
 (w_io, w, w_0, w_hh, v, v_0, err_arr) =
 @time cascade_correlation(training_set_in, training_set_out)

@@ -7,21 +7,21 @@ function adjust_hidden(n_input, n_hidden, w, w_0, v, w_hh, v_0, w_io, training_s
 	alpha_hid_in, w_cand_concr, w_0_cand_concr, w_hh_cand_concr)
 
   eps = 0.1 # patience for adjusting input weights of the candidate
-  err_prev = 0
+  err_prev = 0.0
   err = Inf # incremental error for the candidate hidden unit
 
   for iter=1:100 # iterations for gradient ascent; endless loop protection
 
     err_prev = err
-    err = 0
+    err = 0.0
     alpha_hid_in = alpha_hid_in * 0.98  # decreasing learning rate
 
     # Shuffle patterns
     (training_set_in, training_set_out) = shuffle_patterns(training_set_in, training_set_out)
 
     # Calculating error after adding this hidden unit
-    z_avg = 0 # average output of the new hidden neuron (not yet connected) among the patterns
-    e_avg = 0 # average output error among patterns
+    z_avg = 0.0 # average output of the new hidden neuron (not yet connected) among the patterns
+    e_avg = 0.0 # average output error among patterns
     z_pattern = zeros(size(training_set_in,1))  # hidden unit output values after feed-forward
     y_pattern = zeros(size(training_set_in,1))  # output unit values after feed-forward
     summ = zeros(size(training_set_in,1)) # calculated weighted sums of inputs' of last added hidden neuron
@@ -54,7 +54,7 @@ function adjust_hidden(n_input, n_hidden, w, w_0, v, w_hh, v_0, w_io, training_s
     sign_corr(a,b) = (a * b) / abs(a * b)
 
     # Input-hidden weights bias of NHN
-    d_w_0_cand_concr = 0
+    d_w_0_cand_concr = 0.0
     for i=1:size(training_set_in,1)
       #d_w_0_cand_concr += sign_corr(z_avg, e_avg) * ((training_set_out[i] - y_pattern[i]) - e_avg) * sigmoid_der(summ[i]) * 1 * alpha_hid_in
       d_w_0_cand_concr += ((training_set_out[i] - y_pattern[i]) - e_avg) * sigmoid_der(summ[i]) * 1 * alpha_hid_in
@@ -63,7 +63,7 @@ function adjust_hidden(n_input, n_hidden, w, w_0, v, w_hh, v_0, w_io, training_s
 
     # Input-hidden weights of NHN
     for j=1:n_input
-      d_w_cand_concr = 0
+      d_w_cand_concr = 0.0
       for i=1:size(training_set_in,1)
         d_w_cand_concr += sign_corr(z_avg, e_avg) * ((training_set_out[i] - y_pattern[i]) - e_avg) * sigmoid_der(summ[i]) * training_set_in[i,j] * alpha_hid_in
         #d_w_cand_concr += ((training_set_out[i] - y_pattern[i]) - e_avg) * sigmoid_der(summ[i]) * training_set_in[i,j] * alpha_hid_in
@@ -74,7 +74,7 @@ function adjust_hidden(n_input, n_hidden, w, w_0, v, w_hh, v_0, w_io, training_s
     # Hidden-hidden weights of NHN
     # TODO check for errors
     for j=1:n_hidden
-      d_b_cand_concr = 0
+      d_b_cand_concr = 0.0
       for i=1:size(training_set_in,1)
         d_b_cand_concr += sign_corr(z_avg, e_avg) * ((training_set_out[i] - y_pattern[i]) - e_avg) * sigmoid_der(summ[i]) * z_pattern[i] * alpha_hid_in
         #d_b_cand_concr += ((training_set_out[i] - y_pattern[i]) - e_avg) * sigmoid_der(summ[i]) * z_pattern[i] * alpha_hid_in

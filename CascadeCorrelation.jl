@@ -13,13 +13,14 @@
 - `v` - hidden-output weights [output_neuron,hidden_neuron]
 - `v_0` - bias of hidden-output weights [output_neuron]
 "
-function cascade_correlation(training_set_in, training_set_out)
+
+function cascade_correlation(training_set_in::Array{Float64,2}, training_set_out::Array{Float64,1})
 
   # Parameters and variables
   n_input = size(training_set_in,2)
-  alpha_hid_in = 0.1  # learning rate for new hidden unit's input weights
-  n_candidates = 5  # how many candidate units will be initialized on adding each hidden neuron
-  max_hidden = 8  # maximum amount of hidden units
+  const alpha_hid_in = 0.1  # learning rate for new hidden unit's input weights
+  const n_candidates = 5  # how many candidate units will be initialized on adding each hidden neuron
+  const max_hidden = 8  # maximum amount of hidden units
 
   # Initialization
   n_hidden = 0
@@ -27,20 +28,20 @@ function cascade_correlation(training_set_in, training_set_out)
   v_0 = rand()  # bias of output neuron
 
   # Adjusting input-output weights by Delta Rule as much as possible
-  (w_io, v_0) = delta(n_input, n_hidden, training_set_in, training_set_out, 0, 0, w_io, v_0, 0, 0)[1:2]
+  (w_io, v_0) = delta(n_input, n_hidden, training_set_in, training_set_out, zeros(0,0), zeros(0,0), w_io, v_0, zeros(0,0), zeros(0,0))[1:2]
 
   # Adding first neuron into the Network (Initializing several candidate units, training them, then choosing the best one)
   n_hidden = 0
 
   w = zeros(0,n_input)  # weights (input-hidden) [hidden_neuron,input_neuron]
   w_0 = zeros(0)  # biases of each hidden neuron
-  w_hh = 0 # weights (hidden-hidden) [hidden_neuron_to,hidden_neuron_from]
+  w_hh = 0.0 # weights (hidden-hidden) [hidden_neuron_to,hidden_neuron_from]
   v = rand(1,1) # weights (hidden-output) [output_neuron,hidden_neuron]
 
   z = zeros(n_hidden) # TODO calculated values at the outputs of each hidden neuron
 
-  eps = 0.001  # precision
-  err_prev = 0
+  const eps = 0.001  # precision
+  err_prev = 0.0
   err = Inf
   err_arr = zeros(max_hidden)
 
@@ -49,7 +50,7 @@ function cascade_correlation(training_set_in, training_set_out)
 
     # Incremental squared error (to decide if we need another hidden unit)
     err_prev = err
-    err = 0
+    err = 0.0
 
     (w, w_0, w_hh, v, n_hidden, err) = add_hidden(training_set_in, training_set_out, w, w_0, w_hh, v, v_0, w_io, n_candidates, n_hidden, alpha_hid_in)
 

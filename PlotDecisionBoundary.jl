@@ -2,22 +2,11 @@
 
 function plot_decision_boundary()
 
-  #x_plot = linspace(0.1,7,70)
   x_plot = 0:0.1:10
-  #y_plot = linspace(0.1,7,70)
   y_plot = 0:0.1:10
-  #z_plot_delta = zeros(70,70)
-  #z_plot_hidden = zeros(70,70)
-
-  #for i=1:1:70
-  #  for j=1:1:70
-  #    z_plot_hidden[i,j] = feedforward([x_plot[i] y_plot[j]],n_input,w,w_0,size(w,1),v,v_0,w_hh,w_io)[2][1]
-  #    z_plot_delta[i,j] = feedforward([x_plot[i] y_plot[j]],n_input,0,0,0,0,v_0,0,w_io)[2][1]
-  #  end
-  #end
 
   hidden(x,y) = begin
-    feedforward([x y],n_input,w,w_0,size(w,1),v,v_0,w_hh,w_io)[2][1]
+    feedforward([x,y],n_input,w,w_0,size(w,1),v,v_0,w_hh,w_io)[2][1]
   end
   xgrid = repmat(x_plot',length(y_plot),1)
   ygrid = repmat(y_plot,1,length(x_plot))
