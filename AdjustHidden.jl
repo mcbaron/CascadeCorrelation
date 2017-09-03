@@ -6,9 +6,9 @@
 function adjust_hidden(n_input, n_hidden, w, w_0, v, w_hh, v_0, w_io, training_set_in, training_set_out,
 	alpha_hid_in, w_cand_concr, w_0_cand_concr, w_hh_cand_concr)
 
-  eps = 0.1 # patience for adjusting input weights of the candidate
+  const eps = 10 # patience for adjusting input weights of the candidate
   err_prev = 0.0
-  err = Inf # incremental error for the candidate hidden unit
+  err = Inf # incremental error (correlation) for the candidate hidden unit
 
   for iter=1:100 # iterations for gradient ascent; endless loop protection
 
@@ -38,6 +38,8 @@ function adjust_hidden(n_input, n_hidden, w, w_0, v, w_hh, v_0, w_io, training_s
       e_avg = e_avg / size(training_set_in, 1)  # average residual error
 
       for j=1:size(training_set_in,1) # for each training pattern
+        # Calculating cumulative correlation for each amount of hidden units
+        # The goal is to choose candidate unit with maximum correlation
         err += abs( (z_pattern[j] - z_avg) * (y_pattern[j] - e_avg) )
       end
     end
@@ -45,7 +47,7 @@ function adjust_hidden(n_input, n_hidden, w, w_0, v, w_hh, v_0, w_io, training_s
     # TODO Check for errors & delete
     # In case of gradient ascent, correlation decreases, but should increase
     if (iter % 20 == 0)
-      #print("Iter:",iter," Error:",err,"\n")
+      print("Iter:",iter," Error:",err,"\n")
     end
 
     # Applying gradient ascent (optimizing input weights of the new hidden neuron (NHN))
@@ -82,7 +84,7 @@ function adjust_hidden(n_input, n_hidden, w, w_0, v, w_hh, v_0, w_io, training_s
       w_hh_cand_concr[j] += d_b_cand_concr
     end
 
-    if (abs(err - err_prev) < eps)  # if error not improving, stop
+    if (abs(err - err_prev) < eps)  # if error (correlation) not improving, stop
       break
     end
 

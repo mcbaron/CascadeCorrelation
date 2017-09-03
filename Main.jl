@@ -16,6 +16,8 @@ include("PlotDecisionBoundary.jl")
 include("ReadData.jl")
 import DataFrames.readtable
 using PyPlot
+#using Plots
+#pyplot()
 
 const n_input = 2 # amount of input neurons
 #n_output = 1 # amount of output neurons

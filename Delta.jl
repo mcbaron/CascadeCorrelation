@@ -2,13 +2,13 @@
 "Delta Rule implementation"
 function delta(n_input, n_hidden, training_set_in, training_set_out, w, w_0, w_io, v_0, v, w_hh)
 
-  alpha_out = 0.1 # learning rate
-  eps = 0.02 # patience
+  const alpha_out = 0.1 # learning rate
+  const eps = 0.04 # patience
   err = Inf # squared error between y and y_target
   err_prev = 0.0 # same error on previous iteration
   n_patterns = size(training_set_out,1)
 
-  for iter=1:10 # up to maximum amount of iterations (endless loop protection)
+  for iter=1:50 # up to maximum amount of iterations (endless loop protection)
 
     err_prev = err
     err = 0.0
@@ -29,12 +29,12 @@ function delta(n_input, n_hidden, training_set_in, training_set_out, w, w_0, w_i
 
       # Applying gradient descent (ascent?)
       for j=1:1 # for each output unit
-        d_v_0 += -alpha_out * (training_set_out[i] - y) * sigmoid_der(sum_y) * 1
+        d_v_0 += alpha_out * (training_set_out[i] - y) * sigmoid_der(sum_y) * 1
         for k=1:n_input # for each input unit
-          d_w_io[j,k] += -alpha_out * (training_set_out[i] - y) * sigmoid_der(sum_y) * training_set_in[i,k]
+          d_w_io[j,k] += alpha_out * (training_set_out[i] - y) * sigmoid_der(sum_y) * training_set_in[i,k]
         end
         for k=1:n_hidden
-          d_v[k] += -alpha_out * (training_set_out[i] - y) * sigmoid_der(sum_y) * z[k]
+          d_v[k] += alpha_out * (training_set_out[i] - y) * sigmoid_der(sum_y) * z[k]
         end
       end
 
@@ -53,6 +53,6 @@ function delta(n_input, n_hidden, training_set_in, training_set_out, w, w_0, w_i
     end
   end
 
-  return (w_io, v_0[1], v)
+  return (w_io, v_0[1], v, err)
 
 end

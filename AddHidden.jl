@@ -13,7 +13,7 @@ function add_hidden(training_set_in, training_set_out, w, w_0, w_hh, v, v_0, w_i
 	w_best_cand = 0.0
 	w_0_best_cand = 0.0
 	w_hh_best_cand = 0.0
-	err_min = Inf # minimal error among candidates, will definetly be less than Inf after Adjusting inputs of hidden unit
+	corr_max = 0 # maximum correlation among candidates, will definetly be greater than zero after Adjusting inputs of hidden unit
 
 	# Making some candidate units with different initial weights,
 	# then optimizing them as much as possible
@@ -34,11 +34,11 @@ function add_hidden(training_set_in, training_set_out, w, w_0, w_hh, v, v_0, w_i
 			adjust_hidden(n_input,n_hidden,w,w_0,v,w_hh,v_0,w_io,training_set_in,training_set_out,alpha_hid_in,w_cand[c],w_0_cand[c],w_hh_cand[c])
 		end
 
-		if (err_cand < err_min)  # if this candidate is better
+		if (err_cand > corr_max)  # if this candidate is better
 			w_best_cand = w_cand[c]
 			w_0_best_cand = w_0_cand[c]
 			w_hh_best_cand = w_hh_cand[c]
-			err_min = err_cand
+			corr_max = err_cand
 		end
 	end
 
@@ -47,7 +47,7 @@ function add_hidden(training_set_in, training_set_out, w, w_0, w_hh, v, v_0, w_i
 	if (n_hidden == 1)
 		w = w_best_cand.'
 		w_0 = w_0_best_cand
-		w_hh = 0
+		w_hh = 0.0
 		v = rand()
 	else
 		w = [w; w_best_cand.']
@@ -57,6 +57,6 @@ function add_hidden(training_set_in, training_set_out, w, w_0, w_hh, v, v_0, w_i
 		v = [v; rand()]
 	end
 
-	return (w, w_0, w_hh, v, n_hidden, err_min)
+	return (w, w_0, w_hh, v, n_hidden, corr_max)
 
 end

@@ -19,8 +19,8 @@ function cascade_correlation(training_set_in::Array{Float64,2}, training_set_out
   # Parameters and variables
   n_input = size(training_set_in,2)
   const alpha_hid_in = 0.1  # learning rate for new hidden unit's input weights
-  const n_candidates = 5  # how many candidate units will be initialized on adding each hidden neuron
-  const max_hidden = 8  # maximum amount of hidden units
+  const n_candidates = 10  # how many candidate units will be initialized on adding each hidden neuron
+  const max_hidden = 10  # maximum amount of hidden units
 
   # Initialization
   n_hidden = 0
@@ -40,25 +40,22 @@ function cascade_correlation(training_set_in::Array{Float64,2}, training_set_out
 
   z = zeros(n_hidden) # TODO calculated values at the outputs of each hidden neuron
 
-  const eps = 0.001  # precision
+  const eps = 0.01  # precision
   err_prev = 0.0
   err = Inf
-  err_arr = zeros(max_hidden)
+  err_arr = zeros(max_hidden) # error of prediction for every amount of hidden units
 
-  # Calculating error and adding another hidden unit if needed
+  # Calculating prediction error and adding another hidden unit if needed
   for iteration = 1:max_hidden
 
     # Incremental squared error (to decide if we need another hidden unit)
     err_prev = err
     err = 0.0
 
-    (w, w_0, w_hh, v, n_hidden, err) = add_hidden(training_set_in, training_set_out, w, w_0, w_hh, v, v_0, w_io, n_candidates, n_hidden, alpha_hid_in)
-
-    #v = [v; rand(1,1)]
-    #v = [v; rand()]
+    (w, w_0, w_hh, v, n_hidden) = add_hidden(training_set_in, training_set_out, w, w_0, w_hh, v, v_0, w_io, n_candidates, n_hidden, alpha_hid_in)[1:5]
 
     # Retraining in-out and hid-out weights
-    (w_io, v_0, v) = delta(n_input,n_hidden,training_set_in,training_set_out,w,w_0,w_io,v_0,v,w_hh)
+    (w_io, v_0, v, err) = delta(n_input,n_hidden,training_set_in,training_set_out,w,w_0,w_io,v_0,v,w_hh)
 
     # Calculating error by summating differences between FF results and training set
     for p = 1:size(training_set_in,1)
@@ -69,7 +66,7 @@ function cascade_correlation(training_set_in::Array{Float64,2}, training_set_out
     # History of errors for each amount of hidden units
     err_arr[iteration] = err
 
-    # If error is low enough, stop adjust hidden neurons
+    # If error is low enough, stop adding hidden units
     if (abs(err - err_prev) < eps)
       break
     end
