@@ -13,28 +13,30 @@ function plot_decision_boundary()
   z = map(hidden,xgrid,ygrid)
 
   fig = figure("surf_plot")
-  ax = fig[:add_subplot](2,1,1, projection = "3d")
-  ax[:plot_surface](xgrid, ygrid, z)
+  #ax = fig[:add_subplot](2,1,1)
+  subplot(212)
+  #ax[:plot_surface](xgrid, ygrid, z)
+  surf(xgrid, ygrid, z)
   xlabel("X")
   ylabel("Y")
   title("Surface Plot")
 
-  subplot(212)
-  ax = fig[:add_subplot](2,1,2)
-  cp = ax[:contour](xgrid, ygrid, z)
+  #subplot(212)
+  #ax = fig[:add_subplot](2,1,2)
+  #cp = ax[:contour](xgrid, ygrid, z)
   #ax[:clabel](cp, inline=1, fontsize=10)
-  xlabel("X")
-  ylabel("Y")
-  title("Contour Plot")
-  tight_layout()
+  #xlabel("X")
+  #ylabel("Y")
+  #title("Contour Plot")
+  #tight_layout()
 
-  for i=1:size(training_set_in,1)
-    if (training_set_out[i] == 1)
-      plot(training_set_in[i,1],training_set_in[i,2],"ro")
-    else
-      plot(training_set_in[i,1],training_set_in[i,2],"bo")
-    end
-  end
+  #for i=1:size(training_set_in,1)
+  #  if (training_set_out[i] == 1)
+  #    plot(training_set_in[i,1],training_set_in[i,2],"rx")
+  #  else
+  #    plot(training_set_in[i,1],training_set_in[i,2],"bo")
+  #  end
+  #end
 
   #cs = contour(xgrid,ygrid,z,fill=true)
   #colorbar(cs, shrink=0.8, extent='both')
@@ -42,5 +44,7 @@ function plot_decision_boundary()
   #surf(x_plot, y_plot, z_plot_delta)
   #surf(x_plot, y_plot, z_plot_hidden)
   #plot3D(training_set_in[:,1], training_set_in[:,2], training_set_out, marker='.')
+
+  return fig
 
 end

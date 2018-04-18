@@ -15,8 +15,8 @@ function add_hidden(training_set_in, training_set_out, w, w_0, w_hh, v, v_0, w_i
 	w_hh_best_cand = 0.0
 	corr_max = 0 # maximum correlation among candidates, will definetly be greater than zero after Adjusting inputs of hidden unit
 
-	# Making some candidate units with different initial weights,
-	# then optimizing them as much as possible
+	# Creating a pool of candidate units with different initial weights,
+	# then optimizing each as much as possible
 	for c = 1:n_candidates
 
 		w_cand[c] = rand(1,n_input).'  # weights (input-hidden) [hidden_neuron,input_neuron]

@@ -10,7 +10,7 @@ function adjust_hidden(n_input, n_hidden, w, w_0, v, w_hh, v_0, w_io, training_s
   err_prev = 0.0
   err = Inf # incremental error (correlation) for the candidate hidden unit
 
-  for iter=1:100 # iterations for gradient ascent; endless loop protection
+  for iter=1:200 # iterations for gradient ascent; endless loop protection
 
     err_prev = err
     err = 0.0
@@ -46,7 +46,7 @@ function adjust_hidden(n_input, n_hidden, w, w_0, v, w_hh, v_0, w_io, training_s
 
     # TODO Check for errors & delete
     # In case of gradient ascent, correlation decreases, but should increase
-    if (iter % 20 == 0)
+    if (iter % 100 == 0)
       print("Iter:",iter," Error:",err,"\n")
     end
 

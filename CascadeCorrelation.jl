@@ -18,7 +18,7 @@ function cascade_correlation(training_set_in::Array{Float64,2}, training_set_out
 
   # Parameters and variables
   n_input = size(training_set_in,2)
-  const alpha_hid_in = 0.1  # learning rate for new hidden unit's input weights
+  const alpha_hid_in = 0.01  # learning rate for new hidden unit's input weights
   const n_candidates = 10  # how many candidate units will be initialized on adding each hidden neuron
   const max_hidden = 10  # maximum amount of hidden units
 
@@ -40,7 +40,7 @@ function cascade_correlation(training_set_in::Array{Float64,2}, training_set_out
 
   z = zeros(n_hidden) # TODO calculated values at the outputs of each hidden neuron
 
-  const eps = 0.01  # precision
+  const eps = 0.01  # precision (if after adding hidden unit error decreases less then eps, stop adding)
   err_prev = 0.0
   err = Inf
   err_arr = zeros(max_hidden) # error of prediction for every amount of hidden units
