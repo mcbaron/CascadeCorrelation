@@ -1,43 +1,46 @@
 # Feed-Forward of the CC Neural Network
-# x - input units
-# n_input - amount of input values
-# w - weights (input-hidden)
-# w_0 - biases of hidden neurons
-# n_hidden - amount of hidden neurons
-# v - weights (hidden-output)
-# v_0 - bias of the output neuron
-# b - weights (hidden-hidden)
-# c - weights (input-output)
+# x - input units [n_examples, n_dims]
+# nn_model - CCNN model
 
-function feedforward(x::Array{Float64,1}, n_input::Int64, w::Array{Float64,2}, w_0, n_hidden, v, v_0, w_hh, w_io)
+function feedforward(x::Array{Float64,1}, nn_model)
 
-  z = zeros(n_hidden) # calculated values of each hidden neuron (sigmoid applied)
-  y = 0.0 # output
-  sum_h::Float64 = 0.0 # weighted sum of inputs of the last added hidden neuron
-  sum_y::Float64 = 0.0 # weighted sum of inputs of the output neuron
+  z = zeros(nn_model.n_hidden)  # calculated outputs of each hidden unit (activation function applied)
+  y = 0.0                       # output of the network
+  sum_h::Float64 = 0.0          # weighted sum of inputs of the last added hidden unit
+  sum_y::Float64 = 0.0          # weighted sum of inputs of the output unit
 
-  for i=1:n_hidden # for each hidden neuron
+  # Iterate through hidden units
+  for i=1:nn_model.n_hidden
+    # Weighted sum of inputs for the hidden unit
     sum_h = 0.0
-    sum_h += w_0[i]  # bias (x_0 = 1)
-    for j=1:n_input # input-hidden
-      sum_h += w[i,j]*x[j]
+    sum_h += nn_model.w_0[i]  # bias (x_0 = 1)
+    # Input-hidden connections
+    for j=1:n_input
+      sum_h += nn_model.w[i,j] * x[j]
     end
-    for j=1:i-1 # for each preceding hidden neuron
-      sum_h += w_hh[i,j]*z[j]
+    # Iterate through preceding hidden units; hidden-hidden connections
+    for j=1:i-1
+      sum_h += nn_model.w_hh[i,j] * z[j]
     end
-    z[i] = tanh.(sum_h)[1]  # output of hidden neuron
+    # Output of the hidden unit with activation applied
+    z[i] = activation(sum_h)[1]
   end
 
-  for i=1:1 # for each output neuron
+  # Iterate through output units (one output)
+  for i=1:1
+    # Weighted sum of inputs for the output unit
     sum_y = 0.0
-    sum_y += v_0  # bias (z_0 = 1)
-    for j=1:n_input # for each input neuron
-      sum_y += w_io[i,j]*x[j]
+    sum_y += nn_model.v_0  # bias (z_0 = 1)
+    # Input-output connections
+    for j=1:n_input
+      sum_y += nn_model.w_io[i,j] * x[j]
     end
-    for j=1:n_hidden
-      sum_y += (v[i]*z[j])
+    # Hidden-output connections
+    for j=1:nn_model.n_hidden
+      sum_y += (nn_model.v[i] * z[j])
     end
-    y = tanh.(sum_y)[1] # TODO delete
+    # Output of the network with activation applied
+    y = activation(sum_y)[1]
   end
 
   return (z, y[1], sum_h, sum_y[1]) # returns tuple:

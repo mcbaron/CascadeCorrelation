@@ -1,40 +1,57 @@
+# Delta Rule implementation
 
-"Delta Rule implementation"
-function delta(n_input, n_hidden, training_set_in, training_set_out, w, w_0, w_io, v_0, v, w_hh)
+function delta( nn_model,
+                training_set_in,
+                training_set_out,
+                learning_rate_out,
+                eps_delta,
+                max_iter_delta)
 
-  const alpha_out = 0.1 # learning rate
-  const eps = 0.04 # patience
-  err = Inf # squared error between y and y_target
-  err_prev = 0.0 # same error on previous iteration
-  n_patterns = size(training_set_out,1)
+  # Squared error between y and y_target
+  err = Inf
+  err_prev = 0.0
 
-  for iter=1:50 # up to maximum amount of iterations (endless loop protection)
+  # Amount of examples
+  n_examples = size(training_set_out, 1)
+
+  # Gradient descent iterations (with endless loop protection)
+  for iter=1:max_iter_delta
 
     err_prev = err
     err = 0.0
-    sum_y = 0.0 # weighted sum of inputs of the output neuron
-    alpha_out = alpha_out * 0.99  # decreasing learning rate
+    # Weighted sum of inputs of the output unit
+    sum_y = 0.0
+    # Decrease learning rate
+    learning_rate_out *= 0.98
 
     # Batch gradient descent (ascent)
-    d_v_0 = zeros(size(v_0))
-    d_v = zeros(size(v))
-    d_w_io = zeros(size(w_io))
+    d_v_0 = zeros(size(nn_model.v_0))
+    d_v = zeros(size(nn_model.v))
+    d_w_io = zeros(size(nn_model.w_io))
 
-    (training_set_in, training_set_out) = shuffle_patterns(training_set_in, training_set_out)  # shuffle patterns
+    # Shuffle examples
+    (training_set_in, training_set_out) = shuffle_patterns(training_set_in, training_set_out)
 
-    for i=1:n_patterns  # for each training pattern
-      (z, y) = feedforward(training_set_in[i,:],n_input,w,w_0,n_hidden,v,v_0,w_hh,w_io)[1:2]
-      sum_y = feedforward(training_set_in[i,:],n_input,w,w_0,n_hidden,v,v_0,w_hh,w_io)[4]
+    # Iterate through each example
+    for i=1:n_examples
+      (z, y) = feedforward(training_set_in[i,:], nn_model)[1:2]
+      sum_y = feedforward(training_set_in[i,:], nn_model)[4]
       y = y[1]
 
-      # Applying gradient descent (ascent?)
-      for j=1:1 # for each output unit
-        d_v_0 += alpha_out * (training_set_out[i] - y) * sigmoid_der(sum_y) * 1
-        for k=1:n_input # for each input unit
-          d_w_io[j,k] += alpha_out * (training_set_out[i] - y) * sigmoid_der(sum_y) * training_set_in[i,k]
+      # Difference between target output value and calculated one
+      #e_out = training_set_out[i] - y
+
+      # ----- GRADIENT DESCENT -----
+      # Through output units
+      for j=1:1
+        d_v_0 += learning_rate_out * (training_set_out[i] - y) * activation_der(sum_y) * 1
+        # Through input-output weights
+        for k=1:nn_model.n_input
+          d_w_io[j,k] += learning_rate_out * (training_set_out[i] - y) * activation_der(sum_y) * training_set_in[i,k]
         end
-        for k=1:n_hidden
-          d_v[k] += alpha_out * (training_set_out[i] - y) * sigmoid_der(sum_y) * z[k]
+        # Through hidden-output weights
+        for k=1:nn_model.n_hidden
+          d_v[k] += learning_rate_out * (training_set_out[i] - y) * activation_der(sum_y) * z[k]
         end
       end
 
@@ -42,17 +59,18 @@ function delta(n_input, n_hidden, training_set_in, training_set_out, w, w_0, w_i
       err += (training_set_out[i] - y)^2
     end
 
-    # Batch
-    v_0 += d_v_0
-    w_io += d_w_io
-    v += d_v
-    v_0 = v_0[1]
+    # Batch update
+    nn_model.v_0 += d_v_0
+    nn_model.w_io += d_w_io
+    nn_model.v += d_v
+    nn_model.v_0 = nn_model.v_0[1]
 
-    if (abs(err - err_prev) < eps)
+    # Check precision and break if needed
+    if (abs(err - err_prev) < eps_delta)
       break
     end
   end
 
-  return (w_io, v_0[1], v, err)
+  return (nn_model::NN_model, err)
 
 end

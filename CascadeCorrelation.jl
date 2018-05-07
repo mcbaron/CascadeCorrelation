@@ -1,3 +1,4 @@
+#=
 " Adjusting weights and adding new hidden neurons
 # Arguments:
 
@@ -13,34 +14,46 @@
 - `v` - hidden-output weights [output_neuron,hidden_neuron]
 - `v_0` - bias of hidden-output weights [output_neuron]
 "
+=#
 
-function cascade_correlation(training_set_in::Array{Float64,2}, training_set_out::Array{Float64,1})
+include("FeedForward.jl")
+include("Delta.jl")
+include("AdjustHidden.jl")
+include("AddHidden.jl")
+include("ShufflePatterns.jl")
+
+function cascade_correlation( training_set_in::Array{Float64,2},
+                              training_set_out::Array{Float64,1},
+                              learning_rate_hid_in::Float64,
+                              learning_rate_out::Float64,
+                              eps_delta::Float64,
+                              max_iter_delta::Int64)
 
   # Parameters and variables
-  n_input = size(training_set_in,2)
-  const alpha_hid_in = 0.01  # learning rate for new hidden unit's input weights
-  const n_candidates = 10  # how many candidate units will be initialized on adding each hidden neuron
-  const max_hidden = 10  # maximum amount of hidden units
+  n_inputs = size(training_set_in, 1)
+  n_examples = size(training_set_in, 2)
 
-  # Initialization
-  n_hidden = 0
-  w_io = rand(1,n_input)  # weights input-output [output_neuron,input_neuron]
-  v_0 = rand()  # bias of output neuron
+  # Initialize empty model with random weights
+  nn_model = NN_model(n_input, 0, rand(1, n_input), Float64(0), 0.0, 0.0, 0.0, rand())
+
+  # Loss history
+  err_arr = 0.0
 
   # Adjusting input-output weights by Delta Rule as much as possible
-  (w_io, v_0) = delta(n_input, n_hidden, training_set_in, training_set_out, zeros(0,0), zeros(0,0), w_io, v_0, zeros(0,0), zeros(0,0))[1:2]
+  (nn_model, err_init) =
+    delta(nn_model, training_set_in, training_set_out, learning_rate_out, eps_delta, max_iter_delta)
+  print("\nHidden units: 0", "\tError:", err_init, "\n")
 
   # Adding first neuron into the Network (Initializing several candidate units, training them, then choosing the best one)
-  n_hidden = 0
+  nn_model.n_hidden = 0
 
-  w = zeros(0,n_input)  # weights (input-hidden) [hidden_neuron,input_neuron]
-  w_0 = zeros(0)  # biases of each hidden neuron
-  w_hh = 0.0 # weights (hidden-hidden) [hidden_neuron_to,hidden_neuron_from]
-  v = rand(1,1) # weights (hidden-output) [output_neuron,hidden_neuron]
+  nn_model.w = zeros(0, n_input)  # weights (input-hidden) [hidden_neuron,input_neuron]
+  nn_model.w_0 = zeros(0)  # biases of each hidden neuron
+  nn_model.w_hh = 0.0 # weights (hidden-hidden) [hidden_neuron_to,hidden_neuron_from]
+  nn_model.v = rand(1,1) # weights (hidden-output) [output_neuron,hidden_neuron]
 
-  z = zeros(n_hidden) # TODO calculated values at the outputs of each hidden neuron
+  z = zeros(nn_model.n_hidden) # TODO calculated values at the outputs of each hidden neuron
 
-  const eps = 0.01  # precision (if after adding hidden unit error decreases less then eps, stop adding)
   err_prev = 0.0
   err = Inf
   err_arr = zeros(max_hidden) # error of prediction for every amount of hidden units
@@ -52,30 +65,34 @@ function cascade_correlation(training_set_in::Array{Float64,2}, training_set_out
     err_prev = err
     err = 0.0
 
-    (w, w_0, w_hh, v, n_hidden) = add_hidden(training_set_in, training_set_out, w, w_0, w_hh, v, v_0, w_io, n_candidates, n_hidden, alpha_hid_in)[1:5]
+    # Add hidden unit
+    nn_model =
+      add_hidden(training_set_in, training_set_out, nn_model, n_candidates, learning_rate_hid_in)[1]
 
-    # Retraining in-out and hid-out weights
-    (w_io, v_0, v, err) = delta(n_input,n_hidden,training_set_in,training_set_out,w,w_0,w_io,v_0,v,w_hh)
+    # Retrain input-output and hidden-output weights using delta rule
+    (nn_model, err) =
+      delta(nn_model, training_set_in, training_set_out, learning_rate_out, eps_delta, max_iter_delta)
 
-    # Calculating error by summating differences between FF results and training set
-    for p = 1:size(training_set_in,1)
-      y = feedforward(training_set_in[p,:],n_input,w,w_0,n_hidden,v,v_0,w_hh,w_io)[2]
+    # Calculate error by summating differences between FF results and training set
+    for p = 1:size(training_set_in, 1)
+      y = feedforward(training_set_in[p,:], nn_model)[2]
       err += (training_set_out[p] - y)^2
     end
 
     # History of errors for each amount of hidden units
     err_arr[iteration] = err
+    print("\nHidden units:", iteration, "\tError:", err, "\n")
 
     # If error is low enough, stop adding hidden units
-    if (abs(err - err_prev) < eps)
+    if (abs(err - err_prev) < eps_cascade)
       break
     end
 
   end
 
   print("\nCascade Correlation training completed\n")
-  print("Hidden neurons:",n_hidden,"\n\n")
+  print("Hidden neurons: ", nn_model.n_hidden, "\n\n")
 
-  return (w_io, w, w_0, w_hh, v, v_0, err_arr)
+  return (nn_model, err_arr)
 
 end

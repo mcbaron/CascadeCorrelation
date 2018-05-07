@@ -3,18 +3,19 @@
 # input weights of chosen unit will be frozen after adding
 # n_hidden - number of expected hidden units; one of them not connected yet
 
-function adjust_hidden(n_input, n_hidden, w, w_0, v, w_hh, v_0, w_io, training_set_in, training_set_out,
-	alpha_hid_in, w_cand_concr, w_0_cand_concr, w_hh_cand_concr)
+function adjust_hidden(nn_model, training_set_in, training_set_out, learning_rate_hid_in,
+  w_cand_concr, w_0_cand_concr, w_hh_cand_concr)
 
-  const eps = 10 # patience for adjusting input weights of the candidate
+  const eps = 1 # patience for adjusting input weights of the candidate
   err_prev = 0.0
   err = Inf # incremental error (correlation) for the candidate hidden unit
 
-  for iter=1:200 # iterations for gradient ascent; endless loop protection
+  # Gradient ascent iterations; endless loop protection
+  for iter=1:max_iter_cand
 
     err_prev = err
     err = 0.0
-    alpha_hid_in = alpha_hid_in * 0.98  # decreasing learning rate
+    learning_rate_hid_in *= 0.98  # decreasing learning rate
 
     # Shuffle patterns
     (training_set_in, training_set_out) = shuffle_patterns(training_set_in, training_set_out)
@@ -29,7 +30,7 @@ function adjust_hidden(n_input, n_hidden, w, w_0, v, w_hh, v_0, w_io, training_s
     # Calculating averages for hidden unit values and output error
     for i=1:1 # for each hidden unit (?) TODO
       for j=1:size(training_set_in,1) # for each training pattern
-        y_pattern[j] = feedforward(training_set_in[j,:],n_input,w,w_0,n_hidden,v,v_0,w_hh,w_io)[2]  # network output for each pattern
+        y_pattern[j] = feedforward(training_set_in[j,:], nn_model)[2]  # network output for each pattern
         e_avg += (training_set_out[j] - y_pattern[j])	# not squared? TODO
         z_pattern[j] = (transpose(w_cand_concr) * training_set_in[j,:])[1]  # output of new hidden unit for pattern
         z_avg += z_pattern[j]
@@ -47,10 +48,10 @@ function adjust_hidden(n_input, n_hidden, w, w_0, v, w_hh, v_0, w_io, training_s
     # TODO Check for errors & delete
     # In case of gradient ascent, correlation decreases, but should increase
     if (iter % 100 == 0)
-      print("Iter:",iter," Error:",err,"\n")
+      print("Iter: ", iter, " Error: ", err, "\n")
     end
 
-    # Applying gradient ascent (optimizing input weights of the new hidden neuron (NHN))
+    # Apply gradient ascent (optimizing input weights of the new hidden neuron (NHN))
 
     # Sign of the correlation between NHN output and residual output error
     sign_corr(a,b) = (a * b) / abs(a * b)
@@ -58,8 +59,8 @@ function adjust_hidden(n_input, n_hidden, w, w_0, v, w_hh, v_0, w_io, training_s
     # Input-hidden weights bias of NHN
     d_w_0_cand_concr = 0.0
     for i=1:size(training_set_in,1)
-      #d_w_0_cand_concr += sign_corr(z_avg, e_avg) * ((training_set_out[i] - y_pattern[i]) - e_avg) * sigmoid_der(summ[i]) * 1 * alpha_hid_in
-      d_w_0_cand_concr += ((training_set_out[i] - y_pattern[i]) - e_avg) * sigmoid_der(summ[i]) * 1 * alpha_hid_in
+      #d_w_0_cand_concr += sign_corr(z_avg, e_avg) * ((training_set_out[i] - y_pattern[i]) - e_avg) * activation_der(summ[i]) * 1 * learning_rate_hid_in
+      d_w_0_cand_concr += ((training_set_out[i] - y_pattern[i]) - e_avg) * activation_der(summ[i]) * 1 * learning_rate_hid_in
     end
     w_0_cand_concr += d_w_0_cand_concr  # changing w_0 of the candidate unit
 
@@ -67,29 +68,30 @@ function adjust_hidden(n_input, n_hidden, w, w_0, v, w_hh, v_0, w_io, training_s
     for j=1:n_input
       d_w_cand_concr = 0.0
       for i=1:size(training_set_in,1)
-        d_w_cand_concr += sign_corr(z_avg, e_avg) * ((training_set_out[i] - y_pattern[i]) - e_avg) * sigmoid_der(summ[i]) * training_set_in[i,j] * alpha_hid_in
-        #d_w_cand_concr += ((training_set_out[i] - y_pattern[i]) - e_avg) * sigmoid_der(summ[i]) * training_set_in[i,j] * alpha_hid_in
+        d_w_cand_concr += sign_corr(z_avg, e_avg) * ((training_set_out[i] - y_pattern[i]) - e_avg) * activation_der(summ[i]) * training_set_in[i,j] * learning_rate_hid_in
+        #d_w_cand_concr += ((training_set_out[i] - y_pattern[i]) - e_avg) * activation_der(summ[i]) * training_set_in[i,j] * learning_rate_hid_in
       end
       w_cand_concr[j] += d_w_cand_concr
     end
 
     # Hidden-hidden weights of NHN
     # TODO check for errors
-    for j=1:n_hidden
+    for j=1:nn_model.n_hidden
       d_b_cand_concr = 0.0
       for i=1:size(training_set_in,1)
-        d_b_cand_concr += sign_corr(z_avg, e_avg) * ((training_set_out[i] - y_pattern[i]) - e_avg) * sigmoid_der(summ[i]) * z_pattern[i] * alpha_hid_in
-        #d_b_cand_concr += ((training_set_out[i] - y_pattern[i]) - e_avg) * sigmoid_der(summ[i]) * z_pattern[i] * alpha_hid_in
+        d_b_cand_concr += sign_corr(z_avg, e_avg) * ((training_set_out[i] - y_pattern[i]) - e_avg) * activation_der(summ[i]) * z_pattern[i] * learning_rate_hid_in
+        #d_b_cand_concr += ((training_set_out[i] - y_pattern[i]) - e_avg) * activation_der(summ[i]) * z_pattern[i] * learning_rate_hid_in
       end
       w_hh_cand_concr[j] += d_b_cand_concr
     end
 
-    if (abs(err - err_prev) < eps)  # if error (correlation) not improving, stop
+    # If error (correlation) not improving, stop
+    if (abs(err - err_prev) < eps)
       break
     end
 
   end
 
-  return (w_cand_concr,w_0_cand_concr,w_hh_cand_concr,err)
+  return (w_cand_concr, w_0_cand_concr, w_hh_cand_concr, err)
 
 end
