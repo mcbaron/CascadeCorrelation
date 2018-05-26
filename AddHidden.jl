@@ -14,11 +14,15 @@ function add_hidden(training_set_in, training_set_out, nn_model, n_candidates, l
 	w_best_cand = 0.0
 	w_0_best_cand = 0.0
 	w_hh_best_cand = 0.0
-	corr_max = 0 # maximum correlation among candidates, will definetly be greater than zero after Adjusting inputs of hidden unit
+	# Max correlation among candidates, will definetly be greater than zero after Adjusting inputs of hidden unit
+	# TODO correlation or error???
+	corr_max = 0.0
 
 	# Create a pool of candidate units with different initial weights,
 	# then optimize each as much as possible
 	for c = 1:n_candidates
+
+		print("Candidate unit #", c, "\n")
 
 		w_cand[c] = rand(1,n_input).'  # weights (input-hidden) [hidden_neuron,input_neuron]
 		w_0_cand[c] = rand()  # biases of each hidden neuron
@@ -38,6 +42,7 @@ function add_hidden(training_set_in, training_set_out, nn_model, n_candidates, l
 		end
 
 		if (err_cand > corr_max)  # if this candidate is better
+			print("Better candidate with error: ", err_cand, "\n")
 			w_best_cand = w_cand[c]
 			w_0_best_cand = w_0_cand[c]
 			w_hh_best_cand = w_hh_cand[c]
@@ -59,6 +64,7 @@ function add_hidden(training_set_in, training_set_out, nn_model, n_candidates, l
 		nn_model.w_hh = [nn_model.w_hh; w_hh_best_cand.']
 		nn_model.v = [nn_model.v; rand()]
 	end
+	print("HH:", nn_model.w_hh)
 
 	return (nn_model :: NN_model, corr_max)
 

@@ -7,6 +7,8 @@ function delta( nn_model,
                 eps_delta,
                 max_iter_delta)
 
+  print("\nApplying Delta Rule\n")
+
   # Squared error between y and y_target
   err = Inf
   err_prev = 0.0
@@ -34,9 +36,7 @@ function delta( nn_model,
 
     # Iterate through each example
     for i=1:n_examples
-      (z, y) = feedforward(training_set_in[i,:], nn_model)[1:2]
-      sum_y = feedforward(training_set_in[i,:], nn_model)[4]
-      y = y[1]
+      z, y, _, sum_y = feedforward(training_set_in[i,:], nn_model)
 
       # Difference between target output value and calculated one
       #e_out = training_set_out[i] - y
@@ -64,6 +64,11 @@ function delta( nn_model,
     nn_model.w_io += d_w_io
     nn_model.v += d_v
     nn_model.v_0 = nn_model.v_0[1]
+
+    # Show current error
+    if mod(iter, 10) == 0
+      print("Iter:", iter, "; Error:", err, "\n")
+    end
 
     # Check precision and break if needed
     if (abs(err - err_prev) < eps_delta)
