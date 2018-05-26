@@ -4,13 +4,13 @@
 
 function feedforward(x::Array{Float64,1}, nn_model)
 
-  # calculated outputs of each hidden unit (activation function applied)
+  # Calculated outputs of each hidden unit (with activation applied)
   z = zeros(nn_model.n_hidden)
   # Output of the network
-  y = nothing
   sum_h::Float64 = 0    # weighted sum of inputs of the last added hidden unit
   sum_y::Float64 = 0    # weighted sum of inputs of the output unit
 
+  # --- CLACULATING Z - OUTPUTS OF HIDDEN UNITS ---
   # Iterate through hidden units
   for i=1:nn_model.n_hidden
     # Weighted sum of inputs for the hidden unit
@@ -20,19 +20,16 @@ function feedforward(x::Array{Float64,1}, nn_model)
       sum_h += nn_model.w_hh[i,j] * z[j]
     end
     # Output of the hidden unit with activation applied
-    z[i] = activation(sum_h)[1]
+    z[i] = activation(sum_h)
   end
 
-  # Iterate through output units (one output)
-  for i=1:1
-    # Weighted sum of inputs for the output unit
-    sum_y = nn_model.v_0 + sum(nn_model.w_io * x) + sum(nn_model.v .* z)
+  # --- CALCULATING Y - OUTPUT OF THE NETWORK ---
+  # Weighted sum of inputs for the output unit and activation applied to it
+  sum_y = nn_model.v_0 + sum(nn_model.w_io * x) + sum(nn_model.v .* z)
+  y = activation(sum_y)
 
-    # Output of the network with activation applied
-    y = activation(sum_y)
-  end
-
-  return (z, y[1], sum_h, sum_y[1]) # returns tuple:
+  return (z, y, sum_h, sum_y)
+  # Returned tuple:
   # z - output values of hidden units
   # y - output value of network
   # sum_h - weighted sum of inputs of last added hidden unit
