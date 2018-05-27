@@ -55,3 +55,19 @@ function plot_decision_boundary(nn_model, err_arr)
   #return fig
 
 end
+
+# Plot data points
+function plot_data(training_set_in, training_set_out)
+    scatter(training_set_in[training_set_out .== 1.0, 1],
+        training_set_in[training_set_out .== 1.0, 2],
+        s=nothing,
+        c=nothing,
+        marker="o")
+    scatter(training_set_in[training_set_out .== -1.0, 1],
+        training_set_in[training_set_out .== -1.0, 2],
+        s=nothing,
+        c=nothing,
+        marker="x")
+    xlim((0, 10))
+    ylim((0, 10))
+end
