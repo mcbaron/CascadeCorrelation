@@ -7,7 +7,7 @@ function delta( nn_model,
                 eps_delta,
                 max_iter_delta)
 
-  print("\nApplying Delta Rule\n")
+  print("\nApplying Delta Rule...\n")
 
   # Squared error between y and y_target
   err = Inf
@@ -26,54 +26,46 @@ function delta( nn_model,
     # Decrease learning rate
     learning_rate_out *= 0.98
 
-    # Batch gradient descent (ascent)
-    d_v_0 = zeros(size(nn_model.v_0))
-    d_v = zeros(size(nn_model.v))
-    d_w_io = zeros(size(nn_model.w_io))
-
     # Shuffle examples
     (training_set_in, training_set_out) = shuffle_patterns(training_set_in, training_set_out)
 
-    # Iterate through each example
+    # Iterate through each training example
     for i=1:n_examples
       z, y, _, sum_y = feedforward(training_set_in[i,:], nn_model)
 
       # Difference between target output value and calculated one
       #e_out = training_set_out[i] - y
 
+      # Stochastic gradient descent (ascent)
+      d_v_0 = zeros(size(nn_model.v_0))
+      d_v = zeros(size(nn_model.v))
+      d_w_io = zeros(size(nn_model.w_io))
+
       # ----- GRADIENT DESCENT -----
-      # Through output units
-      for j=1:1
-        d_v_0 += learning_rate_out * (training_set_out[i] - y) * activation_der(sum_y) * 1
-        # Through input-output weights
-        for k=1:nn_model.n_input
-          d_w_io[j,k] += learning_rate_out * (training_set_out[i] - y) * activation_der(sum_y) * training_set_in[i,k]
-        end
-        # Through hidden-output weights
-        for k=1:nn_model.n_hidden
-          d_v[k] += learning_rate_out * (training_set_out[i] - y) * activation_der(sum_y) * z[k]
-        end
-      end
+      # Calculating differences
+      # Output bias
+      d_v_0 = learning_rate_out * (training_set_out[i] - y) * activation_der(sum_y) * 1
+      # Input-output weights
+      d_w_io = learning_rate_out * (training_set_out[i] - y) * activation_der(sum_y) .* training_set_in[i,:]
+      # Hidden-output weights
+      d_v = learning_rate_out * (training_set_out[i] - y) * activation_der(sum_y) .* z[:]
+
+      # Update weights (SGD)
+      nn_model.v_0 += d_v_0
+      nn_model.w_io += d_w_io'
+      nn_model.v += d_v
+      nn_model.v_0 = nn_model.v_0[1]
 
       # Increment error between target and calculated output
       err += (training_set_out[i] - y)^2
     end
 
-    # Batch update
-    nn_model.v_0 += d_v_0
-    nn_model.w_io += d_w_io
-    nn_model.v += d_v
-    nn_model.v_0 = nn_model.v_0[1]
-
     # Show current error
-    if mod(iter, 10) == 0
-      print("Iter:", iter, "; Error:", err, "\n")
-    end
+    (mod(iter, 20) == 0) ? (print("Iter:", iter, "; Error:", err, "\n")) : nothing
 
     # Check precision and break if needed
-    if (abs(err - err_prev) < eps_delta)
-      break
-    end
+    (abs(err - err_prev) < eps_delta) ? break : nothing
+
   end
 
   return (nn_model::NN_model, err)
