@@ -1,6 +1,10 @@
 # Add hidden unit to the network
 
-function add_hidden(training_set_in, training_set_out, nn_model, n_candidates, learning_rate_hid_in)
+function add_hidden(training_set_in,
+					training_set_out,
+					nn_model,
+					n_candidates,
+					learning_rate_hid_in)
 
 	n_input = size(training_set_in,2)
 	n_out = size(training_set_out,2)
@@ -24,9 +28,9 @@ function add_hidden(training_set_in, training_set_out, nn_model, n_candidates, l
 
 		print("Candidate unit #", c, "\n")
 
-		w_cand[c] = rand(1,n_input).'  # weights (input-hidden) [hidden_neuron,input_neuron]
-		w_0_cand[c] = rand()  # biases of each hidden neuron
-		w_hh_cand[c] = [rand(1,nn_model.n_hidden) 0].' # weights (hidden-hidden) [hidden_neuron_from]
+		w_cand[c] = rand(1,n_input).' * 0.1  # weights (input-hidden) [hidden_neuron,input_neuron]
+		w_0_cand[c] = rand() * 0.1  # biases of each hidden neuron
+		w_hh_cand[c] = [rand(1,nn_model.n_hidden) 0].' * 0.1 # weights (hidden-hidden) [hidden_neuron_from]
 
 		# Correlation between output of hidden unit and residual output error of the network
 		# (to decide which candidate unit is best)
@@ -56,15 +60,14 @@ function add_hidden(training_set_in, training_set_out, nn_model, n_candidates, l
 		nn_model.w = w_best_cand.'
 		nn_model.w_0 = w_0_best_cand
 		nn_model.w_hh = 0.0
-		nn_model.v = rand()
+		nn_model.v = rand() * 0.1
 	else
 		nn_model.w = [nn_model.w; w_best_cand.']
 		nn_model.w_0 = [nn_model.w_0; w_0_best_cand]
 		nn_model.w_hh = [nn_model.w_hh zeros(nn_model.n_hidden-1,1)]
 		nn_model.w_hh = [nn_model.w_hh; w_hh_best_cand.']
-		nn_model.v = [nn_model.v; rand()]
+		nn_model.v = [nn_model.v; rand() * 0.1]
 	end
-	print("HH:", nn_model.w_hh)
 
 	return (nn_model :: NN_model, corr_max)
 

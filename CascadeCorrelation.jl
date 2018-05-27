@@ -34,7 +34,7 @@ function cascade_correlation( training_set_in::Array{Float64,2},
   n_examples = size(training_set_in, 1)
 
   # Initialize empty model with random weights
-  nn_model = NN_model(n_input, 0, rand(1, n_input), Float64(0), 0.0, 0.0, 0.0, rand())
+  nn_model = NN_model(n_input, 0, rand(1, n_input) * 0.1, Float64(0), 0.0, 0.0, 0.0, rand() * 0.1)
 
   # Loss history
   err_arr = 0.0
@@ -58,7 +58,7 @@ function cascade_correlation( training_set_in::Array{Float64,2},
   nn_model.w_0 = zeros(0)
   # Weights and biases (hidden-hidden) [hidden_neuron_to,hidden_neuron_from]
   nn_model.w_hh = 0.0
-  nn_model.v = rand(1,1)
+  nn_model.v = rand(1,1) * 0.1
 
   # TODO calculated values at the outputs of each hidden neuron
   z = zeros(nn_model.n_hidden)
